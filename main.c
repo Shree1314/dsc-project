@@ -546,6 +546,10 @@ int main() {
             case 11: checkWarnings(); break;
             case 12: generateReport(); break;
             case 13: 
+                printf("\nSaving database to GitHub...\n");
+                system("git add *.csv");
+                system("git commit -m \"Auto-update database from C App\"");
+                system("git push");
                 printf("\nThank You For Using GoalFund.\n");
                 return 0;
             default:
