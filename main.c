@@ -12,7 +12,7 @@ typedef struct GoalNode { Goal data; struct GoalNode* next; } GoalNode; // Linke
 typedef struct { char month[STR]; float income, savings, expenses, budget; } MonthlyRecord;
 typedef struct { char category[STR]; char month[STR]; float amount; } Expense;
 
-GoalNode* goalHead = 
+GoalNode* goalHead = NULL;
 
 int goalCount = 0, recordCount = 0, top = -1, expenseCount = 0, front = 0, rear = -1, queueCount = 0;
 MonthlyRecord records[MAX_RECORDS]; // Array
