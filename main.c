@@ -440,7 +440,7 @@ void checkWarnings() {
 
 void generateReport() {
     printf("\n=========================================\n");
-    printf("           GOALFUND REPORT\n");
+    printf("           SAVESPHERE REPORT\n");
     printf("=========================================\n");
     printf("Total Goals       : %d\n", goalCount);
     printf("Total Expenses    : %d\n", expenseCount);
@@ -504,7 +504,7 @@ void searchGoal() {
 
 void showMenu() {
     printf("\n=================================\n");
-    printf("            GOALFUND\n");
+    printf("           SAVESPHERE\n");
     printf("=================================\n");
     printf("1. Add Savings Goal (Linked List)\n");
     printf("2. View Goals\n");
@@ -527,7 +527,7 @@ int main() {
     loadFromCSV();
 
     int choice;
-    printf("\nWELCOME TO GOALFUND SYSTEM\n");
+    printf("\nWELCOME TO SAVESPHERE SYSTEM\n");
 
     while (1) {
         showMenu();
@@ -550,7 +550,7 @@ int main() {
                 system("git add *.csv");
                 system("git commit -m \"Auto-update database from C App\"");
                 system("git push");
-                printf("\nThank You For Using GoalFund.\n");
+                printf("\nThank You For Using SaveSphere.\n");
                 return 0;
             default:
                 printf("Invalid Choice.\n");
