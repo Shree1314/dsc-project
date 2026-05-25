@@ -185,7 +185,7 @@ void generateReportAndWarnings() {
         printf("\nGoal: %s | Target: %.2f | Saved: %.2f | Remaining: %.2f", t->data.name, t->data.targetAmount, t->data.savedAmount, rem>0?rem:0);
         if (rem > 0 && getAvg(2) < rem / t->data.deadlineMonths) printf(" -> [WARNING] Behind Schedule!");
     }
-    printf("\n==========================================================\n");
+    printf("\n======================================================\n");
 }
 
 int main() {
