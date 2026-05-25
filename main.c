@@ -125,14 +125,26 @@ void addGoal() {
     if (!goalHead) goalHead = n; else { GoalNode* t = goalHead; while(t->next) t = t->next; t->next = n; }
     goalCount++; saveToCSV(); printf("Goal Added.\n");
 }
+
+void deleteGoal() {
+    char name[STR]; getString("\nEnter Goal Name To Delete: ", name, STR);
+    GoalNode *temp = goalHead, *prev = NULL;
+    if (temp != NULL && strcmp(temp->data.name, name) == 0) { // If head holds the goal
+        goalHead = temp->next; free(temp); goalCount--; saveToCSV(); printf("Goal Deleted Successfully.\n"); return;
+    }
+    while (temp != NULL && strcmp(temp->data.name, name) != 0) { prev = temp; temp = temp->next; } // Search
+    if (temp == NULL) { printf("Goal Not Found.\n"); return; }
+    prev->next = temp->next; free(temp); goalCount--; saveToCSV(); printf("Goal Deleted Successfully.\n");
+}
+
 void searchGoal() {
-    char name[STR]; getString("Enter Goal Name: ", name, STR);
+    char name[STR]; getString("\nEnter Goal Name: ", name, STR);
     GoalNode* found = findGoal(name);
     if (found) printf("\nFound: %s | Target: %.2f | Saved: %.2f | Months: %d\n", found->data.name, found->data.targetAmount, found->data.savedAmount, found->data.deadlineMonths);
     else printf("Goal Not Found.\n");
 }
 void updateSavings() {
-    char name[STR]; getString("Enter Goal Name To Update: ", name, STR);
+    char name[STR]; getString("\nEnter Goal Name To Update: ", name, STR);
     GoalNode* found = findGoal(name);
     if (found) {
         float amount = getFloat("Enter Saving Amount To Add: ");
@@ -190,17 +202,17 @@ void generateReportAndWarnings() {
 int main() {
     loadFromCSV();
     int choice;
-    char menu[] = "\n--- SAVESPHERE ---\n1.Add Goal 2.View Goals 3.Update Savings 4.Add Record\n5.Add Expense 6.View Expenses 7.Undo Expense\n8.Queue Pending Exp 9.Process Pending Exp\n10.Search Goal 11.Report & Warnings 12.Exit\nChoice: ";
+    char menu[] = "\n--- SAVESPHERE ---\n1.Add Goal 2.View Goals 3.Update Savings 4.Delete Goal\n5.Add Record 6.Add Expense 7.View Expenses 8.Undo Expense\n9.Queue Pending Exp 10.Process Pending Exp\n11.Search Goal 12.Report & Warnings 13.Exit\nChoice: ";
     
     while (1) {
         choice = getInt(menu);
         if (choice == 1) addGoal(); else if (choice == 2) viewGoals();
-        else if (choice == 3) updateSavings(); else if (choice == 4) addMonthlyRecord();
-        else if (choice == 5) addExpense(); else if (choice == 6) viewExpenses();
-        else if (choice == 7) popExpense(); else if (choice == 8) enqueuePendingExpense();
-        else if (choice == 9) processPendingExpense(); else if (choice == 10) searchGoal();
-        else if (choice == 11) generateReportAndWarnings();
-        else if (choice == 12) {
+        else if (choice == 3) updateSavings(); else if (choice == 4) deleteGoal();
+        else if (choice == 5) addMonthlyRecord(); else if (choice == 6) addExpense();
+        else if (choice == 7) viewExpenses(); else if (choice == 8) popExpense();
+        else if (choice == 9) enqueuePendingExpense(); else if (choice == 10) processPendingExpense();
+        else if (choice == 11) searchGoal(); else if (choice == 12) generateReportAndWarnings();
+        else if (choice == 13) {
             printf("\nSaving to GitHub...\n"); system("git add *.csv"); system("git commit -m \"Auto-update\""); system("git push");
             return 0;
         } else printf("Invalid.\n");
