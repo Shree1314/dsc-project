@@ -93,18 +93,6 @@ int getInt(char message[]) {
 
 /* --- CSV FILE OPERATIONS --- */
 
-void saveToCSV() {
-    // Save Goals (Linked List Iteration)
-    FILE *fg = fopen("goals.csv", "w");
-    if (fg != NULL) {
-        fprintf(fg, "Name,TargetAmount,SavedAmount,DeadlineMonths\n");
-        GoalNode* temp = goalHead;
-        while (temp != NULL) {
-            fprintf(fg, "%s,%.2f,%.2f,%d\n", temp->data.name, temp->data.targetAmount, temp->data.savedAmount, temp->data.deadlineMonths);
-            temp = temp->next;
-        }
-        fclose(fg);
-    }
 
     // Save Records (Array Iteration)
     FILE *fr = fopen("records.csv", "w");
