@@ -1,31 +1,3 @@
-
-
-
-
-
-
-
-Pasted text(18).txt
-Document
-make this code smaller but dont remove anything from it
-
-Here’s a more compact version of your code without removing functionality — mainly by:
-
-shortening repeated code
-
-combining declarations
-
-removing unnecessary comments/spaces
-
-simplifying conditions/loops
-
-keeping all features intact
-
-Your program structure, linked lists, stack, queue, arrays, CSV handling, searching, reports, etc. are all preserved. 
-
-
-Example of how to compress parts safely:
-
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
@@ -57,10 +29,9 @@ typedef struct{
 
 GoalNode*goalHead=NULL;
 MonthlyRecord records[MAX_RECORDS];
-Expense expenseStack[MAX_EXPENSES],pendingQueue[MAX_EXPENSES];
+Expense expenseStack[MAX_EXPENSES];
 
 int goalCount=0,recordCount=0,top=-1,expenseCount=0;
-int front=0,rear=-1,queueCount=0;
 
 void removeNewline(char*s){
     int l=strlen(s);
@@ -88,612 +59,494 @@ int getInt(char msg[]){
     getchar();
     return v;
 }
-Biggest size reductions you can still do safely:
 
-Merge similar functions (averageIncome, averageSavings, averageExpenses)
+/* CSV FILES */
 
-Create reusable print helpers
+void saveToCSV(){
 
-Create generic CSV save/load helpers
+    FILE *fg=fopen("goals.csv","w");
+    if(fg){
+        fprintf(fg,"Name,TargetAmount,SavedAmount,DeadlineMonths\n");
 
-Replace repeated linked-list insertion logic with one function
+        GoalNode*t=goalHead;
 
-Remove decorative menu formatting strings
+        while(t){
+            fprintf(fg,"%s,%.2f,%.2f,%d\n",
+            t->data.name,
+            t->data.targetAmount,
+            t->data.savedAmount,
+            t->data.deadlineMonths);
 
-Use shorter variable names
-
-For example, these 3 functions:
-
-float averageSavings()
-float averageIncome()
-float averageExpenses()
-can become:
-
-float avg(int type){
-    if(!recordCount) return 0;
-    float t=0;
-    for(int i=0;i<recordCount;i++)
-        t+= type==0 ? records[i].income :
-            type==1 ? records[i].savings :
-                       records[i].expenses;
-    return t/recordCount;
-}
-Then use:
-
-avg(0) // income
-avg(1) // savings
-avg(2) // expenses
-That alone cuts a lot of repeated code.
-
-You can also compress switch cases:
-
-case 1:addGoal();break;
-case 2:viewGoals();break;
-instead of spaced formatting.
-
-Your original code is already pretty clean structurally, so most remaining reduction is stylistic compression rather than algorithmic improvement.
-
-
-/* Structures, Arrays, Functions, Pointers, Macros, Stack, Queue, Searching, Linked list
-Used to store related financial data together
-*/
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-/* Macros */
-#define MAX_RECORDS 50
-#define MAX_EXPENSES 100
-#define STR 50
-
-/* Structures */
-typedef struct {
-char name[STR];
-float targetAmount;
-float savedAmount;
-int deadlineMonths;
-} Goal;
-
-/* Linked List Node Structure (Pointers) /
-typedef struct GoalNode {
-Goal data;
-struct GoalNode next;
-} GoalNode;
-
-typedef struct {
-char month[STR];
-float income;
-float savings;
-float expenses;
-float budget;
-} MonthlyRecord;
-
-typedef struct {
-char category[STR];
-char month[STR];
-float amount;
-} Expense;
-
-/* Arrays & Data Structures */
-
-// Linked List Head
-GoalNode* goalHead = NULL;
-int goalCount = 0;
-
-// Array
-MonthlyRecord records[MAX_RECORDS];
-int recordCount = 0;
-
-// Stack (for undoing expenses)
-Expense expenseStack[MAX_EXPENSES];
-int top = -1;
-int expenseCount = 0;
-
-// Queue (for pending expenses)
-Expense pendingQueue[MAX_EXPENSES];
-int front = 0;
-int rear = -1;
-int queueCount = 0;
-
-/* --- Functions & Pointers --- */
-
-void removeNewline(char *str) {
-int len = strlen(str);
-if (len > 0 && str[len - 1] == '\n') {
-str[len - 1] = '\0';
-}
-}
-
-void getString(char message[], char *arr, int size) {
-printf("%s", message);
-fgets(arr, size, stdin);
-removeNewline(arr);
-}
-
-float getFloat(char message[]) {
-float value;
-printf("%s", message);
-scanf("%f", &value);
-getchar();
-return value;
-}
-
-int getInt(char message[]) {
-int value;
-printf("%s", message);
-scanf("%d", &value);
-getchar();
-return value;
-}
-
-/* --- CSV FILE OPERATIONS --- */
-
-void saveToCSV() {
-// Save Goals (Linked List Iteration)
-FILE fg = fopen("goals.csv", "w");
-if (fg != NULL) {
-fprintf(fg, "Name,TargetAmount,SavedAmount,DeadlineMonths\n");
-GoalNode temp = goalHead;
-while (temp != NULL) {
-fprintf(fg, "%s,%.2f,%.2f,%d\n", temp->data.name, temp->data.targetAmount, temp->data.savedAmount, temp->data.deadlineMonths);
-temp = temp->next;
-}
-fclose(fg);
-}
-
-// Save Records (Array Iteration)
-FILE *fr = fopen("records.csv", "w");
-if (fr != NULL) {
-    fprintf(fr, "Month,Income,Savings,Expenses,Budget\n");
-    for (int i = 0; i < recordCount; i++) {
-        fprintf(fr, "%s,%.2f,%.2f,%.2f,%.2f\n", records[i].month, records[i].income, records[i].savings, records[i].expenses, records[i].budget);
-    }
-    fclose(fr);
-}
-
-// Save Expenses (Stack Iteration)
-FILE *fe = fopen("expenses.csv", "w");
-if (fe != NULL) {
-    fprintf(fe, "Category,Month,Amount\n");
-    for (int i = 0; i <= top; i++) {
-        fprintf(fe, "%s,%s,%.2f\n", expenseStack[i].category, expenseStack[i].month, expenseStack[i].amount);
-    }
-    fclose(fe);
-}
-}
-
-void loadFromCSV() {
-char line[256];
-
-// Load Goals (Insert into Linked List)
-FILE *fg = fopen("goals.csv", "r");
-if (fg != NULL) {
-    fgets(line, sizeof(line), fg); // skip header
-    while (fgets(line, sizeof(line), fg)) {
-        Goal g;
-        sscanf(line, "%[^,],%f,%f,%d", g.name, &g.targetAmount, &g.savedAmount, &g.deadlineMonths);
-        
-        GoalNode* newNode = (GoalNode*)malloc(sizeof(GoalNode));
-        newNode->data = g;
-        newNode->next = NULL;
-
-        if (goalHead == NULL) {
-            goalHead = newNode;
-        } else {
-            GoalNode* temp = goalHead;
-            while (temp->next != NULL) {
-                temp = temp->next;
-            }
-            temp->next = newNode;
+            t=t->next;
         }
-        goalCount++;
+        fclose(fg);
     }
-    fclose(fg);
-}
 
-// Load Records (Array)
-FILE *fr = fopen("records.csv", "r");
-if (fr != NULL) {
-    fgets(line, sizeof(line), fr); // skip header
-    recordCount = 0;
-    while (fgets(line, sizeof(line), fr) && recordCount < MAX_RECORDS) {
-        sscanf(line, "%[^,],%f,%f,%f,%f", records[recordCount].month, &records[recordCount].income, &records[recordCount].savings, &records[recordCount].expenses, &records[recordCount].budget);
-        recordCount++;
+    FILE *fr=fopen("records.csv","w");
+
+    if(fr){
+        fprintf(fr,"Month,Income,Savings,Expenses,Budget\n");
+
+        for(int i=0;i<recordCount;i++){
+            fprintf(fr,"%s,%.2f,%.2f,%.2f,%.2f\n",
+            records[i].month,
+            records[i].income,
+            records[i].savings,
+            records[i].expenses,
+            records[i].budget);
+        }
+
+        fclose(fr);
     }
-    fclose(fr);
-}
 
-// Load Expenses (Stack)
-FILE *fe = fopen("expenses.csv", "r");
-if (fe != NULL) {
-    fgets(line, sizeof(line), fe); // skip header
-    top = -1;
-    expenseCount = 0;
-    while (fgets(line, sizeof(line), fe) && expenseCount < MAX_EXPENSES) {
-        top++;
-        sscanf(line, "%[^,],%[^,],%f", expenseStack[top].category, expenseStack[top].month, &expenseStack[top].amount);
-        expenseCount++;
+    FILE *fe=fopen("expenses.csv","w");
+
+    if(fe){
+        fprintf(fe,"Category,Month,Amount\n");
+
+        for(int i=0;i<=top;i++){
+            fprintf(fe,"%s,%s,%.2f\n",
+            expenseStack[i].category,
+            expenseStack[i].month,
+            expenseStack[i].amount);
+        }
+
+        fclose(fe);
     }
-    fclose(fe);
-}
 }
 
-/* --- STACK OPERATIONS --- */
+void loadFromCSV(){
 
-void pushExpense(Expense e) {
-if (top == MAX_EXPENSES - 1) {
-printf("Expense Stack Overflow.\n");
-return;
-}
-top++;
-expenseStack[top] = e;
-expenseCount++;
-}
+    char line[256];
 
-void popExpense() {
-if (top == -1) {
-printf("No Expense To Undo.\n");
-return;
-}
-printf("\nLast Expense Removed Successfully.\n");
-printf("Removed Expense: %s | %.2f\n", expenseStack[top].category, expenseStack[top].amount);
-top--;
-expenseCount--;
-saveToCSV(); // Save state after undo
-}
+    FILE *fg=fopen("goals.csv","r");
 
-/* --- QUEUE OPERATIONS --- */
+    if(fg){
 
-void enqueuePendingExpense() {
-if (queueCount == MAX_EXPENSES) {
-printf("Pending Queue is Full.\n");
-return;
-}
-Expense e;
-printf("\n======= ADD PENDING EXPENSE (QUEUE) =======\n");
-getString("Enter Expense Category: ", e.category, STR);
-getString("Enter Month: ", e.month, STR);
-e.amount = getFloat("Enter Expense Amount: ");
+        fgets(line,sizeof(line),fg);
 
-if (e.amount < 0) {
-    printf("Invalid Amount.\n");
-    return;
-}
+        while(fgets(line,sizeof(line),fg)){
 
-rear = (rear + 1) % MAX_EXPENSES;
-pendingQueue[rear] = e;
-queueCount++;
-printf("Added to Pending Queue.\n");
-}
+            Goal g;
 
-void processPendingExpense() {
-if (queueCount == 0) {
-printf("No pending expenses to process.\n");
-return;
-}
+            sscanf(line,"%[^,],%f,%f,%d",
+            g.name,
+            &g.targetAmount,
+            &g.savedAmount,
+            &g.deadlineMonths);
 
-Expense e = pendingQueue[front];
-front = (front + 1) % MAX_EXPENSES;
-queueCount--;
+            GoalNode*newNode=(GoalNode*)malloc(sizeof(GoalNode));
 
-pushExpense(e); // Move to real expenses stack
-saveToCSV();
+            newNode->data=g;
+            newNode->next=NULL;
 
-printf("Processed Pending Expense: %s - %.2f\n", e.category, e.amount);
-}
+            if(!goalHead) goalHead=newNode;
 
-/* --- LINKED LIST OPERATIONS --- */
+            else{
+                GoalNode*t=goalHead;
 
-void addGoal() {
-Goal g;
-printf("\n========== ADD GOAL (LINKED LIST) ==========\n");
-getString("Enter Goal Name: ", g.name, STR);
-g.targetAmount = getFloat("Enter Target Amount: ");
-g.savedAmount = getFloat("Enter Saved Amount: ");
-g.deadlineMonths = getInt("Enter Deadline (Months): ");
+                while(t->next) t=t->next;
 
-if (g.targetAmount <= 0 || g.savedAmount < 0 || g.deadlineMonths <= 0) {
-    printf("Invalid Goal Data.\n");
-    return;
-}
+                t->next=newNode;
+            }
 
-// Allocate new node (Pointers)
-GoalNode* newNode = (GoalNode*)malloc(sizeof(GoalNode));
-newNode->data = g;
-newNode->next = NULL;
+            goalCount++;
+        }
 
-if (goalHead == NULL) {
-    goalHead = newNode;
-} else {
-    GoalNode* temp = goalHead;
-    while (temp->next != NULL) {
-        temp = temp->next;
+        fclose(fg);
     }
-    temp->next = newNode;
+
+    FILE *fr=fopen("records.csv","r");
+
+    if(fr){
+
+        fgets(line,sizeof(line),fr);
+
+        while(fgets(line,sizeof(line),fr)&&recordCount<MAX_RECORDS){
+
+            sscanf(line,"%[^,],%f,%f,%f,%f",
+            records[recordCount].month,
+            &records[recordCount].income,
+            &records[recordCount].savings,
+            &records[recordCount].expenses,
+            &records[recordCount].budget);
+
+            recordCount++;
+        }
+
+        fclose(fr);
+    }
+
+    FILE *fe=fopen("expenses.csv","r");
+
+    if(fe){
+
+        fgets(line,sizeof(line),fe);
+
+        while(fgets(line,sizeof(line),fe)&&expenseCount<MAX_EXPENSES){
+
+            top++;
+
+            sscanf(line,"%[^,],%[^,],%f",
+            expenseStack[top].category,
+            expenseStack[top].month,
+            &expenseStack[top].amount);
+
+            expenseCount++;
+        }
+
+        fclose(fe);
+    }
 }
 
-goalCount++;
-saveToCSV(); // Save state
-printf("Goal Added Successfully.\n");
+/* STACK */
+
+void pushExpense(Expense e){
+
+    if(top==MAX_EXPENSES-1){
+        printf("Expense Stack Full.\n");
+        return;
+    }
+
+    expenseStack[++top]=e;
+    expenseCount++;
 }
 
-void viewGoals() {
-if (goalHead == NULL) {
-printf("No Goals Available.\n");
-return;
-}
-printf("\n================ GOALS ================\n");
-printf("%-20s %-12s %-12s %-12s %-10s\n", "Goal", "Target", "Saved", "Remaining", "Months");
-printf("-------------------------------------------------------------\n");
+/* GOALS */
 
-GoalNode* temp = goalHead;
-while (temp != NULL) {
-    float remaining = temp->data.targetAmount - temp->data.savedAmount;
-    if (remaining < 0) remaining = 0;
-    printf("%-20s %-12.2f %-12.2f %-12.2f %-10d\n", temp->data.name, temp->data.targetAmount, temp->data.savedAmount, remaining, temp->data.deadlineMonths);
-    temp = temp->next;
-}
+void addGoal(){
+
+    Goal g;
+
+    printf("\n===== ADD GOAL =====\n");
+
+    getString("Enter Goal Name: ",g.name,STR);
+
+    g.targetAmount=getFloat("Enter Target Amount: ");
+    g.savedAmount=getFloat("Enter Saved Amount: ");
+    g.deadlineMonths=getInt("Enter Deadline(Months): ");
+
+    if(g.targetAmount<=0||g.savedAmount<0||g.deadlineMonths<=0){
+        printf("Invalid Goal Data.\n");
+        return;
+    }
+
+    GoalNode*newNode=(GoalNode*)malloc(sizeof(GoalNode));
+
+    newNode->data=g;
+    newNode->next=NULL;
+
+    if(!goalHead) goalHead=newNode;
+
+    else{
+
+        GoalNode*t=goalHead;
+
+        while(t->next) t=t->next;
+
+        t->next=newNode;
+    }
+
+    goalCount++;
+
+    saveToCSV();
+
+    printf("Goal Added Successfully.\n");
 }
 
-void updateSavings() {
-char name[STR];
-int found = 0;
-getString("Enter Goal Name To Update: ", name, STR);
+void viewGoals(){
 
-// Linear Search on Linked List
-GoalNode* temp = goalHead;
-while (temp != NULL) {
-    if (strcmp(temp->data.name, name) == 0) {
-        float amount = getFloat("Enter Saving Amount To Add: ");
-        if (amount < 0) {
-            printf("Invalid Amount.\n");
+    if(!goalHead){
+        printf("No Goals Available.\n");
+        return;
+    }
+
+    GoalNode*t=goalHead;
+
+    printf("\n=========== GOALS ===========\n");
+
+    while(t){
+
+        float remain=t->data.targetAmount-t->data.savedAmount;
+
+        if(remain<0) remain=0;
+
+        printf("\nGoal      : %s",t->data.name);
+        printf("\nTarget    : %.2f",t->data.targetAmount);
+        printf("\nSaved     : %.2f",t->data.savedAmount);
+        printf("\nRemaining : %.2f",remain);
+        printf("\nDeadline  : %d Months\n",t->data.deadlineMonths);
+
+        t=t->next;
+    }
+}
+
+void updateSavings(){
+
+    char name[STR];
+
+    getString("Enter Goal Name: ",name,STR);
+
+    GoalNode*t=goalHead;
+
+    while(t){
+
+        if(strcmp(t->data.name,name)==0){
+
+            float amt=getFloat("Enter Amount To Add: ");
+
+            if(amt<0){
+                printf("Invalid Amount.\n");
+                return;
+            }
+
+            t->data.savedAmount+=amt;
+
+            saveToCSV();
+
+            printf("Savings Updated.\n");
+
             return;
         }
-        temp->data.savedAmount += amount;
-        printf("Savings Updated Successfully.\n");
-        saveToCSV(); // Save state
-        found = 1;
-        break;
+
+        t=t->next;
     }
-    temp = temp->next;
-}
-if (!found) {
+
     printf("Goal Not Found.\n");
 }
+
+/* MONTHLY RECORD */
+
+void addMonthlyRecord(){
+
+    if(recordCount>=MAX_RECORDS){
+        printf("Storage Full.\n");
+        return;
+    }
+
+    printf("\n===== ADD MONTHLY RECORD =====\n");
+
+    getString("Enter Month: ",records[recordCount].month,STR);
+
+    records[recordCount].income=getFloat("Enter Income: ");
+    records[recordCount].savings=getFloat("Enter Savings: ");
+    records[recordCount].expenses=getFloat("Enter Expenses: ");
+    records[recordCount].budget=getFloat("Enter Budget: ");
+
+    if(records[recordCount].expenses>
+       records[recordCount].budget){
+
+        printf("WARNING: Budget Exceeded.\n");
+    }
+
+    recordCount++;
+
+    saveToCSV();
+
+    printf("Record Added Successfully.\n");
 }
 
-/* --- ARRAY OPERATIONS --- */
+/* EXPENSE */
 
-void addMonthlyRecord() {
-if (recordCount >= MAX_RECORDS) {
-printf("Monthly Record Storage Full.\n");
-return;
-}
-printf("\n======= ADD MONTHLY RECORD =======\n");
-getString("Enter Month: ", records[recordCount].month, STR);
-records[recordCount].income = getFloat("Enter Monthly Income: ");
-records[recordCount].savings = getFloat("Enter Monthly Savings: ");
-records[recordCount].expenses = getFloat("Enter Monthly Expenses: ");
-records[recordCount].budget = getFloat("Enter Budget Limit: ");
+void addExpense(){
 
-if (records[recordCount].income < 0 || records[recordCount].savings < 0 || records[recordCount].expenses < 0 || records[recordCount].budget < 0) {
-    printf("Invalid Record Data.\n");
-    return;
-}
-if (records[recordCount].expenses > records[recordCount].budget) {
-    printf("\nWARNING: Budget Exceeded By %.2f\n", records[recordCount].expenses - records[recordCount].budget);
-}
+    Expense e;
 
-recordCount++;
-saveToCSV(); // Save state
-printf("Monthly Record Added Successfully.\n");
+    printf("\n===== ADD EXPENSE =====\n");
+
+    getString("Enter Category: ",e.category,STR);
+    getString("Enter Month: ",e.month,STR);
+
+    e.amount=getFloat("Enter Amount: ");
+
+    if(e.amount<0){
+        printf("Invalid Amount.\n");
+        return;
+    }
+
+    pushExpense(e);
+
+    saveToCSV();
+
+    printf("Expense Added.\n");
 }
 
-void addExpense() {
-Expense e;
-printf("\n========== ADD EXPENSE ==========\n");
-getString("Enter Expense Category: ", e.category, STR);
-getString("Enter Month: ", e.month, STR);
-e.amount = getFloat("Enter Expense Amount: ");
+void viewExpenses(){
 
-if (e.amount < 0) {
-    printf("Invalid Amount.\n");
-    return;
-}
+    if(top==-1){
+        printf("No Expenses Available.\n");
+        return;
+    }
 
-pushExpense(e);
-saveToCSV(); // Save state
-printf("Expense Added Successfully.\n");
-}
+    printf("\n=========== EXPENSES ===========\n");
 
-void viewExpenses() {
-if (top == -1) {
-printf("No Expenses Available.\n");
-return;
-}
-printf("\n=============== EXPENSES ===============\n");
-printf("%-20s %-15s %-10s\n", "Category", "Month", "Amount");
-printf("------------------------------------------------\n");
-for (int i = 0; i <= top; i++) {
-printf("%-20s %-15s %-10.2f\n", expenseStack[i].category, expenseStack[i].month, expenseStack[i].amount);
-}
+    for(int i=0;i<=top;i++){
+
+        printf("\nCategory : %s",expenseStack[i].category);
+        printf("\nMonth    : %s",expenseStack[i].month);
+        printf("\nAmount   : %.2f\n",expenseStack[i].amount);
+    }
 }
 
-/* --- STATISTICS & REPORTS --- */
+/* AVERAGES */
 
-float averageSavings() {
-if (recordCount == 0) return 0;
-float total = 0;
-for (int i = 0; i < recordCount; i++) total += records[i].savings;
-return total / recordCount;
-}
+float avg(int type){
 
-float averageIncome() {
-if (recordCount == 0) return 0;
-float total = 0;
-for (int i = 0; i < recordCount; i++) total += records[i].income;
-return total / recordCount;
-}
+    if(!recordCount) return 0;
 
-float averageExpenses() {
-if (recordCount == 0) return 0;
-float total = 0;
-for (int i = 0; i < recordCount; i++) total += records[i].expenses;
-return total / recordCount;
+    float t=0;
+
+    for(int i=0;i<recordCount;i++){
+
+        if(type==0) t+=records[i].income;
+        else if(type==1) t+=records[i].savings;
+        else t+=records[i].expenses;
+    }
+
+    return t/recordCount;
 }
 
-void checkWarnings() {
-int warning = 0;
-printf("\n=========== WARNING SYSTEM ===========\n");
-for (int i = 0; i < recordCount; i++) {
-if (records[i].expenses > records[i].budget) {
-printf("Budget Exceeded In %s\n", records[i].month);
-warning = 1;
-}
-if (records[i].savings < (records[i].income * 0.20)) {
-printf("Low Savings In %s\n", records[i].month);
-warning = 1;
-}
-}
-float avgSave = averageSavings();
+/* WARNING */
 
-GoalNode* temp = goalHead;
-while (temp != NULL) {
-    float remaining = temp->data.targetAmount - temp->data.savedAmount;
-    if (remaining > 0) {
-        float required = remaining / temp->data.deadlineMonths;
-        if (avgSave < required) {
-            printf("Goal '%s' May Miss Deadline\n", temp->data.name);
-            warning = 1;
+void checkWarnings(){
+
+    int warning=0;
+
+    printf("\n======= WARNINGS =======\n");
+
+    for(int i=0;i<recordCount;i++){
+
+        if(records[i].expenses>records[i].budget){
+
+            printf("Budget Exceeded In %s\n",
+            records[i].month);
+
+            warning=1;
+        }
+
+        if(records[i].savings<
+           records[i].income*0.20){
+
+            printf("Low Savings In %s\n",
+            records[i].month);
+
+            warning=1;
         }
     }
-    temp = temp->next;
+
+    if(!warning) printf("No Warnings.\n");
 }
 
-if (!warning) printf("No Warnings.\n");
+/* REPORT */
+
+void generateReport(){
+
+    printf("\n========= REPORT =========\n");
+
+    printf("Goals          : %d\n",goalCount);
+    printf("Expenses       : %d\n",expenseCount);
+    printf("MonthlyRecords : %d\n",recordCount);
+
+    printf("\nAverage Income   : %.2f",avg(0));
+    printf("\nAverage Savings  : %.2f",avg(1));
+    printf("\nAverage Expenses : %.2f\n",avg(2));
 }
 
-void generateReport() {
-printf("\n=========================================\n");
-printf(" SAVESPHERE REPORT\n");
-printf("=========================================\n");
-printf("Total Goals : %d\n", goalCount);
-printf("Total Expenses : %d\n", expenseCount);
-printf("Monthly Records : %d\n", recordCount);
-printf("\nAverage Income : %.2f\n", averageIncome());
-printf("Average Savings : %.2f\n", averageSavings());
-printf("Average Expenses : %.2f\n", averageExpenses());
-printf("\n============= GOAL STATUS =============\n");
+/* SEARCH */
 
-GoalNode* temp = goalHead;
-while (temp != NULL) {
-    float remaining = temp->data.targetAmount - temp->data.savedAmount;
-    if (remaining < 0) remaining = 0;
-    printf("\nGoal Name : %s\n", temp->data.name);
-    printf("Target    : %.2f\n", temp->data.targetAmount);
-    printf("Saved     : %.2f\n", temp->data.savedAmount);
-    printf("Remaining : %.2f\n", remaining);
-    printf("Deadline  : %d Months\n", temp->data.deadlineMonths);
-    
-    if (remaining == 0) {
-        printf("Status    : COMPLETED\n");
-    } else {
-        float required = remaining / temp->data.deadlineMonths;
-        printf("Need/Month: %.2f\n", required);
-        if (averageSavings() >= required) {
-            printf("Status    : ON TRACK\n");
-        } else {
-            printf("Status    : BEHIND SCHEDULE\n");
+void searchGoal(){
+
+    char name[STR];
+
+    getString("Enter Goal Name: ",name,STR);
+
+    GoalNode*t=goalHead;
+
+    while(t){
+
+        if(strcmp(t->data.name,name)==0){
+
+            printf("\nGoal Found\n");
+
+            printf("Goal Name : %s\n",t->data.name);
+            printf("Target    : %.2f\n",t->data.targetAmount);
+            printf("Saved     : %.2f\n",t->data.savedAmount);
+            printf("Deadline  : %d Months\n",
+            t->data.deadlineMonths);
+
+            return;
+        }
+
+        t=t->next;
+    }
+
+    printf("Goal Not Found.\n");
+}
+
+/* MENU */
+
+void showMenu(){
+
+    printf("\n=============================\n");
+    printf("        SAVESPHERE\n");
+    printf("=============================\n");
+
+    printf("1. Add Savings Goal\n");
+    printf("2. View Goals\n");
+    printf("3. Update Savings\n");
+    printf("4. Add Monthly Record\n");
+    printf("5. Add Direct Expense\n");
+    printf("6. View Expenses\n");
+    printf("7. Search Goal\n");
+    printf("8. Check Warnings\n");
+    printf("9. Generate Report\n");
+    printf("10. Exit\n");
+
+    printf("=============================\n");
+}
+
+int main(){
+
+    loadFromCSV();
+
+    int choice;
+
+    printf("\nWELCOME TO SAVESPHERE\n");
+
+    while(1){
+
+        showMenu();
+
+        choice=getInt("Enter Choice: ");
+
+        switch(choice){
+
+            case 1:addGoal();break;
+            case 2:viewGoals();break;
+            case 3:updateSavings();break;
+            case 4:addMonthlyRecord();break;
+            case 5:addExpense();break;
+            case 6:viewExpenses();break;
+            case 7:searchGoal();break;
+            case 8:checkWarnings();break;
+            case 9:generateReport();break;
+
+            case 10:
+
+                printf("\nSaving database...\n");
+
+                system("git add *.csv");
+                system("git commit -m \"Auto-update\"");
+                system("git push");
+
+                printf("\nThank You For Using SaveSphere.\n");
+
+                return 0;
+
+            default:
+                printf("Invalid Choice.\n");
         }
     }
-    temp = temp->next;
+
+    return 0;
 }
-printf("\n=========================================\n");
-}
-
-/* --- SEARCHING --- */
-
-void searchGoal() {
-char name[STR];
-int found = 0;
-getString("Enter Goal Name To Search: ", name, STR);
-
-// Linear Search on Linked List
-GoalNode* temp = goalHead;
-while (temp != NULL) {
-    if (strcmp(temp->data.name, name) == 0) {
-        printf("\nGoal Found.\n");
-        printf("Goal Name : %s\n", temp->data.name);
-        printf("Target    : %.2f\n", temp->data.targetAmount);
-        printf("Saved     : %.2f\n", temp->data.savedAmount);
-        printf("Deadline  : %d Months\n", temp->data.deadlineMonths);
-        found = 1;
-        break;
-    }
-    temp = temp->next;
-}
-if (!found) printf("Goal Not Found.\n");
-}
-
-/* --- MAIN MENU --- */
-
-void showMenu() {
-printf("\n=================================\n");
-printf(" SAVESPHERE\n");
-printf("=================================\n");
-printf("1. Add Savings Goal (Linked List)\n");
-printf("2. View Goals\n");
-printf("3. Update Savings\n");
-printf("4. Add Monthly Record (Array)\n");
-printf("5. Add Direct Expense (Stack)\n");
-printf("6. View Expenses\n");
-printf("7. Undo Last Expense (Stack Pop)\n");
-printf("8. Add Pending Expense (Queue)\n");
-printf("9. Process Pending Expense (Queue)\n");
-printf("10. Search Goal (Linear Search)\n");
-printf("11. Check Warnings\n");
-printf("12. Generate Report\n");
-printf("13. Exit\n");
-printf("=================================\n");
-}
-
-int main() {
-// Load existing data from CSV on startup
-loadFromCSV();
-
-int choice;
-printf("\nWELCOME TO SAVESPHERE SYSTEM\n");
-
-while (1) {
-    showMenu();
-    choice = getInt("Enter Your Choice: ");
-    switch (choice) {
-        case 1: addGoal(); break;
-        case 2: viewGoals(); break;
-        case 3: updateSavings(); break;
-        case 4: addMonthlyRecord(); break;
-        case 5: addExpense(); break;
-        case 6: viewExpenses(); break;
-        case 7: popExpense(); break;
-        case 8: enqueuePendingExpense(); break;
-        case 9: processPendingExpense(); break;
-        case 10: searchGoal(); break;
-        case 11: checkWarnings(); break;
-        case 12: generateReport(); break;
-        case 13: 
-            printf("\nSaving database to GitHub...\n");
-            system("git add *.csv");
-            system("git commit -m \"Auto-update database from C App\"");
-            system("git push");
-            printf("\nThank You For Using SaveSphere.\n");
-            return 0;
-        default:
-            printf("Invalid Choice.\n");
-    }
-}
-return 0;
-}
-
-
-Close
