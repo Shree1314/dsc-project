@@ -539,7 +539,7 @@ int main() {
             case 4: addMonthlyRecord(); break;
             case 5: addExpense(); break;
             case 6: viewExpenses(); break;
-            case 7: popExpense(); brea;
+            case 7: popExpense(); break;
             case 8: enqueuePendingExpense(); break;
             case 9: processPendingExpense(); break;
             case 10: searchGoal(); break;
