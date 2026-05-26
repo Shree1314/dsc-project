@@ -199,14 +199,4 @@ This keeps CSV data updated on GitHub.
 - Sorting Algorithms
 - Monthly Charts & Reports
 
----
 
-# Author
-
-Developed as a DSA-based Finance Management Project in C.
-
----
-
-# License
-
-This project is open-source and free to use for educational purposes.
